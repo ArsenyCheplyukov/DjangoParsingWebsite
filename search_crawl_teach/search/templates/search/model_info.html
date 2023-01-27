@@ -1,0 +1,11 @@
+{% extends 'search/base.html' %}
+
+{% block content %}
+    <h1>{{model_data.type}}</h1>
+
+    <!-- {% if post.photo %}
+    <p><img class="img-article-left" src="{{post.photo.url}}"></p>
+    {% endif %} -->
+
+    {{model_data.content|linebreaks}}
+{% endblock %}
