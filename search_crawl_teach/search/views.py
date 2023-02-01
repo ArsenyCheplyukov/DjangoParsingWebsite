@@ -46,7 +46,7 @@ class AddModel(CreateView):
         # a = ModelData.objects.last()
         # self.request_data = RequestData.objects.get(pk=self.kwargs["model_slug"])
         # a.save()
-        context["model_slug"] = self.kwargs["model_slug"]
+        # context["model_slug"] = self.kwargs["model_slug"]
         # print(self.request.session.get('model_data'))
         return context
 
@@ -62,6 +62,19 @@ class ModelInfo(DetailView):
         context = super().get_context_data(**kwargs)
         context["title"] = "menu"
         context["menu"] = menu
+        return context
+
+
+class ImageListInfo(ListView):
+    model = ImageData
+    template_name = 'search/image_data.html'
+    context_object_name = 'images'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = "menu"
+        context["menu"] = menu
+        context["data"] = ImageData.objects.filter(request_data_id=self.kwargs["request_id"])
         return context
 
 

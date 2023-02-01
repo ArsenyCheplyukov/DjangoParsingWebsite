@@ -23,7 +23,8 @@ class RequestData(models.Model):
         return self.request_text[:25]
 
     def get_absolute_url(self):
-        return reverse_lazy("model_set", kwargs={"model_slug": self.id})
+        # return reverse_lazy("model_set", kwargs={"model_slug": self.id})
+        return reverse_lazy("model_set")
 
     class Meta:
         verbose_name = "Запрос"
@@ -33,7 +34,7 @@ class RequestData(models.Model):
 
 class ImageData(models.Model):
     request_data = models.ForeignKey("RequestData", on_delete=models.CASCADE, verbose_name="Запрос")
-    photo = models.ImageField(upload_to="photos/%Y/%m/%d/", verbose_name="Фото", width_field=480, height_field=480)
+    photo = models.ImageField(upload_to="photos/%Y/%m/%d/", verbose_name="Фото")
     name = models.CharField(max_length=100, verbose_name="Название")
     slug = models.SlugField(max_length=255, verbose_name="URL")
 

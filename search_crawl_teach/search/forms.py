@@ -36,16 +36,3 @@ class AddModelDataForm(forms.ModelForm):
         model = ModelData
         fields = ["type", "request_data"]
         type = forms.ChoiceField(widget=forms.RadioSelect, choices=TYPES)
-        # widgets = {  # attrs={"class": "form-choice-input"}, attrs={"class": "form-input-model"}
-        # }
-
-    # def clean_model_data(self):
-    #     jdata = self.cleaned_data["model_data"]
-    #     try:
-    #         json_data = json.loads(jdata)  # loads string as json
-    #         # validate json_data
-    #     except:
-    #         raise forms.ValidationError("Неверные данные в поле для JSON")
-    #     # if json data not valid:
-    #     # raise forms.ValidationError("Invalid data in jsonfield")
-    #     return jdata
