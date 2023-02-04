@@ -1,5 +1,7 @@
 import json
 
+from django.core.validators import MinValueValidator, MaxValueValidator
+
 from django.db import models
 from django.urls import reverse_lazy
 
@@ -14,7 +16,11 @@ TYPES = [
 
 class RequestData(models.Model):
     request_text = models.CharField(max_length=255, verbose_name="Текст запроса")
-    num_samples = models.IntegerField(verbose_name="Колличество картинок")
+    num_samples = models.IntegerField(verbose_name="Колличество картинок", 
+        validators=[
+            MinValueValidator(50),
+            MaxValueValidator(500)
+        ])
     slug = models.SlugField(max_length=255, verbose_name="URL")
     time_create = models.DateTimeField(auto_now_add=True, verbose_name="Время создания")
     is_published = models.BooleanField(default=True, verbose_name="Публикация")
@@ -34,7 +40,7 @@ class RequestData(models.Model):
 
 class ImageData(models.Model):
     request_data = models.ForeignKey("RequestData", on_delete=models.CASCADE, verbose_name="Запрос")
-    photo = models.ImageField(upload_to="photos/%Y/%m/%d/", verbose_name="Фото")
+    photo = models.ImageField(upload_to="photos/", verbose_name="Фото")
     name = models.CharField(max_length=100, verbose_name="Название")
     slug = models.SlugField(max_length=255, verbose_name="URL")
 

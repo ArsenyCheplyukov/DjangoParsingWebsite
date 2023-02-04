@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-ol0=1spd!5_^g5q$p+%4&%4okb@ft_16jpgmco@hth^&!tn=c%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1"]
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -128,3 +128,8 @@ MEDIA_URL = "/media/"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# Celery settings
+CELERY_BROKER_URL = "redis://default:redispw@localhost:32769"
+CELERY_RESULT_BACKEND = "redis://default:redispw@localhost:32769"

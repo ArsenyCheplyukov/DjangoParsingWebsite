@@ -3,10 +3,12 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404, HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views.generic import CreateView, DetailView, FormView, ListView
 
 from .forms import *
 from .models import *
+from .tasks import *
 from .utils import *
 
 menu = [
@@ -17,16 +19,27 @@ menu = [
 ]
 
 
-class AddRequest(CreateView):
+class AddRequest(FormView):
     form_class = AddRequestDataForm
     template_name = "search/addrequest.html"
     slug_url_kwarg = "model_slug"
+    success_url = reverse_lazy("model_set")
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = "Добавление запроса"
         context["menu"] = menu
         return context
+
+    def form_valid(self, form):
+        text = form.cleaned_data.get("request_text")
+        n_images = form.cleaned_data.get("num_samples")
+        a = RequestData.objects.create(
+            request_text=text, num_samples=n_images, slug=uuid.uuid4().hex, time_create=timezone.now()
+        )
+        a.save()
+        get_images_fit_request.run(a.id, text, n_images)
+        return super().form_valid(form)
 
     # def get_queryset(self):
     #     return RequestData.objects.filter(is_published=True)
@@ -67,8 +80,8 @@ class ModelInfo(DetailView):
 
 class ImageListInfo(ListView):
     model = ImageData
-    template_name = 'search/image_data.html'
-    context_object_name = 'images'
+    template_name = "search/image_data.html"
+    context_object_name = "images"
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)

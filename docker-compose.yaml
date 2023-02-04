@@ -1,0 +1,41 @@
+version: "3.10.8"
+
+services:
+  redis:
+    image: redis
+    restart: always
+
+  django:
+    container_name: django
+    restart: always
+    build:
+      context: ./
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    command:
+      [
+        "python",
+        "./search_crawl_teach/manage.py",
+        "runserver",
+        "0.0.0.0:8000"
+      ]
+
+  worker:
+    container_name: celery
+    restart: always
+    build:
+      context: ./webapp
+    volumes:
+      - ./cats:app/search_crawl_teach/media/photos
+    command:
+      [
+        'celery',
+        '--workdir=./search_crawl_teach',
+        '-A',
+        'search_crawl_teach',
+        'worker'
+      ]
+    depends_on:
+      - redis
