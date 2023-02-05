@@ -5,10 +5,10 @@ import uuid
 from urllib.request import urlretrieve
 
 from celery import shared_task
+from django.conf import settings
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
-from django.conf import settings
 from .models import *
 
 

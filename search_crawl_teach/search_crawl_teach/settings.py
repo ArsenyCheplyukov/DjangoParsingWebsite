@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "search.apps.SearchConfig",
+    'django_celery_results',
 ]
 
 MIDDLEWARE = [
@@ -131,5 +132,5 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # Celery settings
-CELERY_BROKER_URL = "redis://default:redispw@localhost:32769"
-CELERY_RESULT_BACKEND = "redis://default:redispw@localhost:32769"
+CELERY_BROKER_URL = "redis://default:redispw@localhost:32769/0"
+CELERY_RESULT_BACKEND = "redis://default:redispw@localhost:32769/0"
