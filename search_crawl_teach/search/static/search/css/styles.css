@@ -1,11 +1,17 @@
+@font-face {
+	font-family: 'ChopinScript';
+	src: url("/static/ChopinScript.ttf");
+}
+
 html,
 body {
-	font-family: 'Arial';
+	font-family: ChopinScript;
 	margin: 0;
 	padding: 0;
 	height: 100%;
 	width: 100%;
 	color: #444;
+	flex-direction: column;
 }
 
 a {
@@ -179,7 +185,7 @@ div.button {
 	margin: 0 auto;
 	padding: 5px 20px 5px 20px;
 	border-radius: 10px;
-	font-size: 20px;
+	font-size: 28px;
 }
 
 .table-content {
@@ -201,7 +207,7 @@ div.button {
 	margin: 0;
 	padding: 20px 10px 10px 20px;
 	list-style: none;
-	font-size: 20px;
+	font-size: 28px;
 }
 
 .left-chapters ul li {
@@ -259,8 +265,8 @@ ul.breadcrumbs {
 	margin: 0;
 	padding: 0;
 	list-style: none;
-	font-size: 20px;
-	font-family: Sans-serif, Arial, Tahoma;
+	font-size: 28px;
+	font-family: ChopinScript;
 }
 
 ul.breadcrumbs li {
@@ -289,8 +295,8 @@ ul.control {
 	margin: 0;
 	padding: 60px 0 0 0;
 	list-style: none;
-	font-family: Sans-serif, Arial, Tahoma;
-	font-size: 18px;
+	font-family: ChopinScript;
+	font-size: 24px;
 	width: 100%;
 }
 
@@ -327,8 +333,8 @@ ul.content-table {
 	margin: 0;
 	padding: 60px 0 0 30px;
 	list-style: none;
-	font-family: Sans-serif, Arial, Tahoma;
-	font-size: 28px;
+	font-family: ChopinScript;
+	font-size: 32px;
 }
 
 ul.content-table li {
@@ -347,12 +353,12 @@ ul.content-table li a:hover {
 .content-text {
 	margin: 60px 0 0 30px;
 	color: #000;
-	font-size: 20px;
-	font-family: Yandex Sans Display Light;
+	font-size: 28px;
+	font-family: ChopinScript;
 }
 
 .content-text h1 {
-	font-size: 32px;
+	font-size: 48px;
 }
 
 ul.lang-list {
@@ -364,8 +370,8 @@ ul.lang-list {
 	height: 50px;
 	border-top: 1px solid #959A82;
 	box-sizing: border-box;
-	font-size: 18px;
-	font-family: Sans-serif, Arial, Tahoma;
+	font-size: 24px;
+	font-family: ChopinScript;
 }
 
 ul.lang-list li {
@@ -394,28 +400,28 @@ ul.lang-list li a:hover {
 
 .topic-subject .topic-text {
 	display: inline-block;
-	font-size: 28px;
+	font-size: 32px;
 	color: #777;
 	padding: 0 10px 0 10px;
 	margin-left: 30px;
 	background: #fff;
-	font-family: Sans-serif, Arial, Tahoma;
+	font-family: ChopinScript;
 }
 
 .list-topic {
 	margin: 40px 0 60px 0;
-	font-family: Sans-serif, Arial, Tahoma;
+	font-family: ChopinScript;
 }
 
 .list-topic p {
 	margin: 0;
-	font-size: 28px;
+	font-size: 32px;
 }
 
 .list-topic ol {
 	columns: 2;
 	-webkit-columns: 2;
-	column-gap: 40px;
+	column-gap: 48px;
 }
 
 .list-topic ol li {
@@ -458,7 +464,7 @@ ul.lang-list li a:hover {
 .quote {
 	background: url('../images/blockquote.png') no-repeat 0 10px;
 	padding: 5px 5px 5px 70px;
-	font-family: Sans-serif, Arial, Tahoma;
+	font-family: ChopinScript;
 	font-style: italic;
 }
 
@@ -468,8 +474,8 @@ ul.lang-list li a:hover {
 	background: #3F4137;
 	padding: 5px;
 	color: #aaa;
-	font-size: 14px;
-	font-family: Verdana, Geneva, Arial, Helvetica;
+	font-size: 18px;
+	font-family: ChopinScript;
 	text-align: left;
 	overflow: hidden;
 }
@@ -499,4 +505,8 @@ ul.lang-list li a:hover {
 .form-button {
 	min-width: 200px;
 	font-size: 16px;
+}
+
+.td .tr footer {
+	margin-top: auto;
 }

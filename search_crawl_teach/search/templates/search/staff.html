@@ -1,0 +1,79 @@
+<!-- Use HTML5 semantic elements -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Use Django variable for title of the page -->
+    <title>{{ title }}</title>
+    
+    {% load static %}
+    <!-- Use correct MIME type for CSS styles -->
+    <link rel="stylesheet" type="text/css" href="{% static 'search/css/styles.css' %}">
+    <!-- Use Django variable for shortcut icon -->
+    <link rel="shortcut icon" href="{% static 'search/images/main.ico' %}" type="image/x-icon">
+    <!-- Use responsive design for different devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <!-- Use correct HTML table structure -->
+    <table class="table-page">
+        <tbody>
+            <tr>
+                <!-- Use HTML5 aside element for sidebar -->
+                <aside class="left-chapters" style="width: 15%; padding: 20px;">
+                    <ul id="leftchapters">
+                        <li>Sidebar Item 1</li>
+                        <li>Sidebar Item 2</li>
+                        <li>Sidebar Item 3</li>
+                        <li>Sidebar Item 4</li>
+                    </ul>
+                </aside>
+                <td valign="top" style="width: 85%; padding-right: 20px;">
+                    <!-- Use Jinja block for main menu -->
+                    {% block mainmenu %}
+                        <header class="header">
+                            <nav class="mainmenu" id="mainmenu">
+                                <ul>
+                                    <li class="logo"><a href="{% url 'home' %}"><div class="logo"></div></a></li>
+                                    
+                                    <!-- Use Jinja loop for menu items -->
+                                    {% for m in menu %}
+                                        <!-- Code for menu items -->
+                                    {% endfor %}
+                                </ul>
+                            </nav>
+                            <div class="clear"></div>
+                        </header>
+                    {% endblock mainmenu %}
+
+                    <!-- Use correct HTML table structure -->
+                    <table class="table-content">
+                        <tbody>
+                            <tr>
+                                <!-- Use HTML5 section element for content block -->
+                                <section class="content">
+                                    <!-- Use Jinja block for breadcrumbs -->
+                                    {% block breadcrumbs %}
+                                        <!-- Code for breadcrumbs -->
+                                    {% endblock %}
+
+                                    <!-- Use HTML5 article element for content text -->
+                                    <article class="content-text">
+                                        <!-- Use Jinja block for content -->
+                                        {% block content %}
+                                            <!-- Code for content -->
+                                        {% endblock %}
+                                    </article>
+                                </section>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!-- Use HTML5 footer element for footer -->
+                    <footer id="footer">
+                        <p>Справочная информация внизу</p>
+                    </footer>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

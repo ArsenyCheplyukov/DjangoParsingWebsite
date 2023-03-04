@@ -1,14 +1,18 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
-        <title>{{title}}</title>
-        <link type="text/css" href="{% static 'search/css/styles.css' %}" rel="stylesheet" />
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        <link rel="shortcut icon" href="{% static 'search/images/main.ico' %}" type="image/x-icon"/>
+        <!-- Use Django variable for title of the page -->
+        <title>{{ title }}</title>
+        {% load static %}
+        <!-- Use correct MIME type for CSS styles -->
+        <link rel="stylesheet" type="text/css" href="{% static 'search/css/styles.css' %}">
+        <!-- Use Django variable for shortcut icon -->
+        <link rel="shortcut icon" href="{% static 'search/images/main.ico' %}" type="image/x-icon">
+        <!-- Use responsive design for different devices -->
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
-    <body>
+    <body style="background-image:url({% static 'search/images/background.jpg' %}); background-size:cover;">
         <table class="table-page" border=0 cellpadding="0" cellspacing="0">
         <tr><td valign=top>
             {% block mainmenu %}
@@ -31,7 +35,7 @@
         <tr>
         <!-- Sidebar слева -->
             <td valign="top" class="left-chapters">
-                <ul id="leftchapters">
+                <ul id="leftchapters" style="background-image:url({%static 'search/images/sidebar_background.jpg'%}); background-size:cover;">
                     {% comment %} {% if cat_selected == 0 %}
                         <li class="selected">Все категории</li>
                     {% else %}
@@ -41,26 +45,31 @@
                 </ul>
             </td>
         <!-- Конец Sidebar'а -->
+
         <td valign="top" class="content">
             <!-- Хлебные крошки -->
             {% block breadcrumbs %}
             {% endblock %}
 
         <!-- Блок контента -->
-            <div class="content-text">
+        <article class="content-text">
+            <!-- Use Jinja block for content -->
             {% block content %}
+                <!-- Code for content -->
             {% endblock %}
-            </div>
+        </article>
         <!-- Конец блока контента -->
 
         </td></tr></table>
             </td></tr>
             <!-- Footer -->
             <tr><td valign=top>
-                <div id="footer">
+                <footer id="footer">
                     <p>Справочная информация внизу</p>
-                </div>
+                </footer>
         </td></tr></table>
         <!-- Конец footer'а и страницы -->
     </body>
 </html>
+
+

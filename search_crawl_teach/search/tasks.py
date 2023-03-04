@@ -101,15 +101,19 @@ def get_images_fit_request(object_id, request_text, n_images):
     for i in filtered[:n_images]:
         slug = uuid.uuid4().hex
         # urlretrieve(i, os.path.join(save_folder, request_text.strip().replace(" ", "_") + str(count) + ".jpg"))
-        result = urlretrieve(
-            i,
-            os.path.join(
-                settings.BASE_DIR + "search_crawl_teach/media/photos",
-                slug + ".jpg",
-            ),
-        )
-        count += 1
-        name = request_text.strip().replace(" ", "_") + str(count)
-        ref_object = RequestData.objects.get(id=object_id)
-        a = ImageData.objects.create(photo=f"photos/{slug}.jpg", name=name, slug=slug, request_data=ref_object)
-        a.save()
+        print(settings.BASE_DIR)
+        try:
+            result = urlretrieve(
+                i,
+                os.path.join(
+                    settings.BASE_DIR + "search_crawl_teach/media/photos",
+                    slug + ".jpg",
+                ),
+            )
+            count += 1
+            name = request_text.strip().replace(" ", "_") + str(count)
+            ref_object = RequestData.objects.get(id=object_id)
+            a = ImageData.objects.create(photo=f"photos/{slug}.jpg", name=name, slug=slug, request_data=ref_object)
+            a.save()
+        except:
+            break
