@@ -1,16 +1,15 @@
-FROM python:3.10.8
+FROM python:3
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-    postgresql-client \
-    && rm -rf /var/lib/apt/lists/*
+ENV PYTHONBUFFERED 1
 
-ENV PYTHONBUFFERED=1
+ADD . /app
 
-WORKDIR /usr/src/app
-COPY requirements.txt ./
+WORKDIR /app/search_crawl_teach
+
+COPY ./requirements.txt /app/search_crawl_teach/requirements.txt
+
+RUN pip install --upgrade pip
+
 RUN pip install -r requirements.txt
-COPY . .
 
-EXPOSE 8000
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+COPY . /app

@@ -1,32 +1,56 @@
-version: "3.10.8"
+# Use version 3 of the docker-compose file format
+version: '3'
 
+# Define services that make up the application
 services:
-  django:
-    container_name: django
-    restart: always
-    build:
-      context: .
-    ports:
-      - "8000:8000"
+
+  # The web service, which runs the Django application
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - .:/app
-    command: python search_crawl_teach/manage.py runserver 0.0.0.0:8000
-
-  redis:
-    container_name: redis
-    image: redis:latest
+      - .:/usr/src/app/
     ports:
-      - "6379:6379"
+      - 1337:8000
+    environment:
+      - DEBUG=1
+      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
     depends_on:
-      - django
+      - redis_hostname # NEW
 
-  worker:
-    container_name: celery
-    restart: always
-    build:
-      context: .
-    command:
-      - celery -A search_crawl_teach worker -B
+  # The celery service, which runs asynchronous tasks using Celery and Redis as a broker and backend respectively 
+  celery:
+    build: .
+    command: celery -A search_crawl_teach worker -l info
+    volumes:
+      - .:/usr/src/app/
+    environment:
+      - DEBUG=1
+      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
     depends_on:
-      - redis
-      - django
+      - redis_hostname
+      - web
+
+  # # The flower service, which provides an interface for monitoring Celery tasks  
+  # flower:
+  #   image: mher/flower # Use Flower Docker image from Docker Hub  
+  #   command: --port=5555 --broker=redis://redis_hostname/0 # Run Flower on port 5555 with Redis as broker  
+
+  redis_hostname:
+    # Redis service used by Celery and Flower    
+    image: redislabs/redis:4.5.0-18
+    command: redis-cli
+    # volumes:
+    #   - data:/data
+
+  db_hostname:
+    # Postgres database used by Django app 
+    image: nouchka/sqlite3:latest
+    stdin_open: true
+    tty: true
+    ports:
+      - 9000:9000 # expose ports - HOST:CONTAINER
+    restart: unless-stopped
+
+volumes:
+  data:
