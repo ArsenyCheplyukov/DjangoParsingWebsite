@@ -1,75 +1,59 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <!-- Use Django variable for title of the page -->
         <title>{{ title }}</title>
         {% load static %}
-        <!-- Use correct MIME type for CSS styles -->
         <link rel="stylesheet" type="text/css" href="{% static 'search/css/styles.css' %}">
-        <!-- Use Django variable for shortcut icon -->
-        <link rel="shortcut icon" href="{% static 'search/images/main.ico' %}" type="image/x-icon">
-        <!-- Use responsive design for different devices -->
+        <link rel="shortcut icon" href="{% static 'search/images/favicon.ico' %}" type="image/x-icon">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
     </head>
-    <body style="background-image:url({% static 'search/images/background.jpg' %}); background-size:cover;">
-        <table class="table-page" border=0 cellpadding="0" cellspacing="0">
-        <tr><td valign=top>
-            {% block mainmenu %}
-                <div class="header">
-                    <ul id="mainmenu" class="mainmenu">
-                        <li class="logo"><a href="{% url 'home' %}"><div class="logo"></div></a></li>
-                        {% for m in menu %}
-                            {% comment %} {% if not forloop.last %}
-                                    <li><a href="{% url m.url_name %}">{{m.title}}</a></li>
-                            {% else %}
-                                    <li class="last"><a href="{% url m.url_name %}">{{m.title}}</a></li>
-                            {% endif %} {% endcomment %}
-                        {% endfor %}
-                    </ul>
-                    <div class="clear"></div>
-                </div>
-            {% endblock mainmenu %}
 
-            <table class="table-content" border=0 cellpadding="0" cellspacing="0">
-        <tr>
-        <!-- Sidebar слева -->
-            <td valign="top" class="left-chapters">
-                <ul id="leftchapters" style="background-image:url({%static 'search/images/sidebar_background.jpg'%}); background-size:cover;">
-                    {% comment %} {% if cat_selected == 0 %}
-                        <li class="selected">Все категории</li>
-                    {% else %}
-                        <li><a href="{% url 'home' %}">Все категории</a></li>
-                    {% endif %}
-                    {% show_categories cat_selected=cat_selected %} {% endcomment %}
+    <body>
+        <div class="page-container">
+            <div class="header">
+                <ul id="mainmenu" class="mainmenu">
+                    <li class="logo"><a href="{% url 'home' %}"><div class="logo"></div></a></li>
                 </ul>
-            </td>
-        <!-- Конец Sidebar'а -->
+                <div class="clear"></div>
+            </div>
 
-        <td valign="top" class="content">
-            <!-- Хлебные крошки -->
-            {% block breadcrumbs %}
-            {% endblock %}
+            <div class="content-container">
+                <div class="left-chapters">
+                    <ul id="leftchapters">
+                    </ul>
+                </div>
 
-        <!-- Блок контента -->
-        <article class="content-text">
-            <!-- Use Jinja block for content -->
-            {% block content %}
-                <!-- Code for content -->
-            {% endblock %}
-        </article>
-        <!-- Конец блока контента -->
+                <div class="content">
+                    {% block breadcrumbs %}
+                    {% endblock %}
 
-        </td></tr></table>
-            </td></tr>
-            <!-- Footer -->
-            <tr><td valign=top>
-                <footer id="footer">
-                    <p>Справочная информация внизу</p>
-                </footer>
-        </td></tr></table>
-        <!-- Конец footer'а и страницы -->
+                    <article class="content-text">
+                        {% block content %}
+                        {% endblock %}
+                    </article>
+                </div>
+            </div>
+
+            <div class="footer">
+                <table class="footer-links">
+                    <thead>
+                        <tr>
+                            <!-- Telegram link with Telegram logo -->
+                            <th><a href="https://t.me/mytelegramchannel"><img src="{% static 'search/images/telegram-logo.ico' %}" alt="Telegram Logo"><span> Telegram</span></a></th>
+
+                            <!-- YouTube link with YouTube logo -->
+                            <th><a href="https://www.youtube.com/myyoutubechannel"><img src="{% static 'search/images/youtube-logo.ico' %}" alt="YouTube Logo"><span> YouTube</span></a></th>
+
+                            <!-- Phone number link with phone logo -->
+                            <th><a href="tel:99-13-295"><img src="{% static 'search/images/phone-logo.ico' %}" alt="Phone Logo"><span> 99-13-295</span></a></th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+        <script src="{% static 'js/animation.js' %}"></script>
     </body>
 </html>
-
-
