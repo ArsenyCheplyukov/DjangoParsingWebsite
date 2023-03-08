@@ -1,4 +1,243 @@
-/* TOO MUCH UNSUSED CODE, NEED TO FIX THAT */
+/* TOO MUCH UNSUSED CODE,
+NEED TO FIX THAT */
+
+/* FORM SETTINS FOR CHOICE FIELDS */
+
+.form-control {
+	background-color: white;
+	border-color: orange;
+	color: blue;
+	padding: 10px;
+	font-size: 16px;
+	border-radius: 5px;
+	background-image: linear-gradient(to bottom, orange, white);
+	transition: all 0.4s ease-out;
+}
+
+.form-control option {
+	background-color: orange;
+	color: white;
+}
+
+.form-control:hover {
+	background-color: blue;
+}
+
+.form-control:focus {
+	background-color: orange;
+	transform: scale(1.1);
+	outline: none;
+	background-image: linear-gradient(to bottom, white, orange);
+	box-shadow: 0px 0px 20px orange;
+}
+
+
+
+
+
+/* Code for stylizing submit button in main view */
+.custom-btn {
+	background: linear-gradient(to bottom, #FFFFFF, #F2F2F2);
+	border: none;
+	border-radius: 5px;
+	color: #333333;
+	padding: 10px 20px;
+	font-family: "Open Sans", sans-serif;
+	font-weight: bold;
+	font-size: 1.2rem;
+	cursor: pointer;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+	transition: all 0.2s ease-in-out;
+}
+
+.custom-btn:hover {
+	background: linear-gradient(to bottom, #F2F2F2, #E6E6E6);
+	transform: translateY(-3px);
+}
+
+.custom-btn:active {
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+	transform: translateY(1px);
+	background-color: #007ACC;
+	background-image: linear-gradient(to bottom, #007ACC, #0062A8);
+	border-radius: 5px;
+	color: #FFFFFF;
+}
+
+
+/* Code for formatting other elements of forms */
+
+.form {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	max-width: 600px;
+	margin: 2rem auto;
+	background-color: #fff;
+	border-radius: 10px;
+	padding: 2rem;
+	box-shadow: 0px 0px 15px -3px rgba(0, 0, 0, 0.75);
+}
+
+.form h1 {
+	float: center;
+	margin-top: 0;
+	font-size: 2rem;
+	font-weight: 600;
+	color: #333;
+}
+
+label {
+	margin-bottom: 0.5rem;
+	font-weight: 600;
+	color: #333;
+}
+
+input,
+textarea {
+	padding: 0.5rem;
+	margin-bottom: 1rem;
+	border-radius: 5px;
+	border: none;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+	font-family: "Open Sans", sans-serif;
+	font-size: 1rem;
+	outline: none;
+	width: 100%;
+}
+
+textarea {
+	height: 150px;
+}
+
+button[type="submit"] {
+	background: linear-gradient(to bottom, #007ACC, #0062A8);
+	color: #fff;
+	border: none;
+	border-radius: 5px;
+	margin-top: 1rem;
+	padding: 0.75rem 1.5rem;
+	font-size: 1.2rem;
+	font-weight: bold;
+	font-family: "Open Sans", sans-serif;
+	cursor: pointer;
+	box-shadow: 0px 3px 5px -1px rgba(0, 0, 0, 0.4);
+	transition: all 0.2s ease-in-out;
+}
+
+button[type="submit"]:hover {
+	transform: translateY(-2px);
+	background: linear-gradient(to bottom, #0062A8, #004B87);
+}
+
+button[type="submit"]:active {
+	box-shadow: 0px 1px 3px -1px rgba(0, 0, 0, 0.75);
+	transform: translateY(1px);
+	background: linear-gradient(to bottom, #0062A8, #004B87);
+}
+
+
+/* CODE FOR ICON ANIMATION */
+#logo {
+	padding: 10px 10px 10px 25px;
+	width: 42px;
+	height: 42px;
+	/* box-shadow: 0px 3px 5px -1px rgba(0, 0, 0, 0.4); */
+	transition: all 0.2s ease-in-out;
+}
+
+#logo:hover {
+	transform: rotate(5deg);
+	transform: translateX(1px);
+	transform: translateY(1px);
+	transition: all 0.3s ease-in-out;
+}
+
+
+/* STYLIZING FOR CHOICE FIELD */
+/* Style form fields */
+form input,
+form select {
+	padding: 10px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	box-sizing: border-box;
+	width: 100%;
+}
+
+/* Style submit button */
+form button[type=submit] {
+	background-color: orange;
+	border: none;
+	color: white;
+	padding: 8px 16px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 16px;
+	margin: 4px 2px;
+	cursor: pointer;
+	border-radius: 4px;
+}
+
+/* Style choice field */
+form select option {
+	background-color: blue;
+	color: white;
+}
+
+form select {
+	background-color: black;
+	color: white;
+	font-weight: bold;
+	padding: 10px;
+	border: none;
+	border-radius: 4px;
+	width: 100%;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 16 12" xmlns="http://www.w3.org/2000/svg"><polygon points="8,12 0,0 16,0"></polygon></svg>');
+	background-repeat: no-repeat;
+	background-position-x: calc(100% - 10px);
+	background-position-y: center;
+	background-color: black;
+}
+
+/* Add hover animation */
+.color-select {
+	color: white;
+	background-color: black;
+	border: 2px solid white;
+	border-radius: 5px;
+	padding: 5px;
+	transition: background-color 0.2s ease-in-out;
+}
+
+.color-select option[value="O"] {
+	background-color: orange;
+}
+
+.color-select option[value="B"] {
+	background-color: blue;
+}
+
+.color-select option[value="W"] {
+	background-color: white;
+}
+
+
+.color-select:focus {
+	outline: none;
+	box-shadow: 0 0 5px white;
+}
+
+.color-select:hover {
+	background-color: orange;
+}
+
+
+
 
 
 html,
@@ -14,16 +253,6 @@ body {
 a {
 	color: #0059b2;
 	text-decoration: none;
-}
-
-a:hover {
-	color: #CC0000;
-	text-decoration: underline;
-}
-
-img {
-	max-width: 600px;
-	height: auto;
 }
 
 img.img-article-left {
@@ -262,10 +491,6 @@ ul.breadcrumbs li a {
 	text-decoration: none;
 }
 
-ul.breadcrumbs li a:hover {
-	color: #CC0000;
-}
-
 ul.breadcrumbs li:after {
 	padding: 0 10px 0 10px;
 	content: "\2192";
@@ -307,10 +532,6 @@ ul.control li.last:after {
 ul.control li a {
 	color: #0059b2;
 	text-decoration: none;
-}
-
-ul.control li a:hover {
-	color: #CC0000;
 }
 
 ul.content-table {

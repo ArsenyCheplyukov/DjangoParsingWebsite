@@ -37,11 +37,11 @@ services:
   #   command: --port=5555 --broker=redis://redis_hostname/0 # Run Flower on port 5555 with Redis as broker  
 
   redis_hostname:
-    # Redis service used by Celery and Flower    
-    image: redislabs/redis:4.5.0-18
-    command: redis-cli
-    # volumes:
-    #   - data:/data
+    image: redis:latest
+    volumes:
+      - data:/data
+    ports:
+      - 6379:6379
 
   db_hostname:
     # Postgres database used by Django app 

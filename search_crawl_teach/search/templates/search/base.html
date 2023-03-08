@@ -9,6 +9,7 @@
         <link rel="shortcut icon" href="{% static 'search/images/favicon.ico' %}" type="image/x-icon">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap" rel="stylesheet"/>
     </head>
 
     <body style="background-image:url({% static 'search/images/background.jpg' %}); background-size:cover;">
@@ -18,11 +19,9 @@
                     {% block mainmenu %}
                     <div class="header">
                         <ul id="mainmenu" class="mainmenu">
-                            <li class="logo">
-                                <a href="{%url 'home' %}">
-                                    <div class="logo" style="background-image:url({%static 'search/images/favicon.ico'%}); background-repeat:no-repeat;"></div>
-                                </a>
-                            </li>
+                            <a href="{%url 'home' %}">
+                                <div class="logo" id="logo" style="background-image:url({%static 'search/images/favicon.ico'%}); background-repeat:no-repeat;"></div>
+                            </a>
                         </ul>
                         <div class="clear"></div>
                     </div>
@@ -53,7 +52,7 @@
                 <td valign="top">
                     <!-- Footer section with links -->
                     <footer id="footer">
-                        <span style="float: right; padding: 25px 50px" valign="bottom">Text Here</span>
+                        <span style="float: right; padding: 25px 50px" valign="bottom">Made by Arseny Void</span>
                         <!-- Table to organize footer links -->
                         <table class="footer-links" style="text-align: left;" valign="top">
                             <thead>
@@ -73,6 +72,6 @@
                 </td>
             </tr>
         </table>
-        <script src="{% static 'js/animation.js' %}"></script>
+        {% comment %} <script src="{% static 'js/animation.js' %}"></script> {% endcomment %}
     </body>
 </html> 

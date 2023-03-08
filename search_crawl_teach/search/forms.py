@@ -2,6 +2,7 @@ import json
 
 from django import forms
 from django.core.exceptions import ValidationError
+from django.core.validators import validate_slug
 
 from .models import *
 
@@ -39,4 +40,18 @@ class AddModelDataForm(forms.ModelForm):
     class Meta:
         model = ModelData
         fields = ["type", "request_data"]
-        type = forms.ChoiceField(widget=forms.RadioSelect, choices=TYPES)
+        type = forms.ChoiceField(
+            widget=forms.RadioSelect(
+                attrs={
+                    "class": "form-control",
+                }
+            ),
+            choices=TYPES,
+            required=True,
+        )
+
+    def clean_type(self):
+        type = self.cleaned_data["type"]
+        if type not in [a[0] for a in TYPES]:
+            raise ValidationError(f"Не является {[a[0] for a in TYPES]}")
+        return type
