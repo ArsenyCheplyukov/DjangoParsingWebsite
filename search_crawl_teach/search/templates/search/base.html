@@ -6,31 +6,59 @@
         <title>{{ title }}</title>
         {% load static %}
         <link rel="stylesheet" type="text/css" href="{% static 'search/css/styles.css' %}">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"/>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap"/>
         <link rel="shortcut icon" href="{% static 'search/images/favicon.ico' %}" type="image/x-icon">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap" rel="stylesheet"/>
     </head>
 
     <body style="background-image:url({% static 'search/images/background.jpg' %}); background-size:cover;">
+        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
         <table class="table-page" border="0" cellpadding="0" cellspacing="0">
             <tr>
                 <td valign="top">
                     {% block mainmenu %}
-                    <div class="header">
-                        <ul id="mainmenu" class="mainmenu">
-                            <a href="{%url 'home' %}">
-                                <div class="logo" id="logo" style="background-image:url({%static 'search/images/favicon.ico'%}); background-repeat:no-repeat;"></div>
-                            </a>
-                        </ul>
-                        <div class="clear"></div>
-                    </div>
+                        <div class="header">
+                            <ul id="mainmenu" class="mainmenu">
+                                <a href="{%url 'home' %}">
+                                    <div class="logo" id="logo" style="background-image:url({%static 'search/images/favicon.ico'%}); background-repeat:no-repeat;"></div>
+                                </a>
+                            </ul>
+                            <div class="clear"></div>
+                        </div>
                     {% endblock mainmenu %}
 
                     <table class="table-content" border="0" cellpadding="0" cellspacing="0">
                         <tr>
                             <td valign="top" class="left-chapters">
+                                <script>
+                                    $(document).ready(function(){
+                                        $('.dropdown-toggle').dropdown();
+                                    });
+                                </script>
                                 <ul id="leftchapters" style="background-image:url({%static 'search/images/sidebar_background.jpg'%}); background-size:cover;">
+                                    <li class="{% if request.resolver_match.view_name == 'home' %}active{% endif %}">
+                                        <a href="{% url 'home' %}">Добавление Запроса</a>
+                                    </li>
+                                    <li class="{% if request.resolver_match.view_name == 'model_set' %}active{% endif %}">
+                                        <a href="{% url 'model_set' %}">Добавление Модели</a>
+                                    </li>
+                                    <li class="dropdown">
+                                        <a class="dropdown-toggle" data-toggle="dropdown" href="{% url 'validation' 1 %}">
+                                            Информация О Модели<span class="caret"></span>
+                                        </a>
+                                        <ul class="dropdown-menu">
+                                            {% for model in models %}
+                                                <li><a href="{% url 'validation' model.id %}">{{ model.type }} - {{ model.slug }}</a></li>
+                                            {% endfor %}
+                                        </ul>
+                                    </li>
                                 </ul>
                             </td>
 
@@ -41,6 +69,58 @@
                                 <article class="content-text">
                                     {% block content %}
                                     {% endblock %}
+
+                                    {% comment %} Make progress bar: {% endcomment %}
+
+                                    {% if task_id %}
+                                        <div class="progress">
+                                        <div class="progress-bar progress-bar-striped" role="progressbar" aria-valuenow="{{ job_progress }}" aria-valuemin="0" aria-valuemax="100" style="width:{{ job_progress }}%">
+                                            {{ job_progress }}%
+                                        </div>
+                                        </div>
+
+                                        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                                        <script>
+                                        $(document).ready(function() {
+                                            $("#my_form").submit(function(e) {
+                                            e.preventDefault();
+                                            var form_data = $(this).serialize();
+                                            $.ajax({
+                                                type: "POST",
+                                                url: "{% url 'home' %}",
+                                                data: form_data,
+                                                success: function(data) { }
+                                            });
+                                            });
+
+                                            var progress_interval = null;
+                                            function show_progress(job_id) {
+                                            progress_interval = setInterval(function() {
+                                                {% if job_id %}
+                                                $.ajax({
+                                                    type: "GET",
+                                                    url: "{% url 'celery_progress:task_status' job_id %}",
+                                                    success: function(data) {
+                                                    if (data.progress) {
+                                                        $(".progress-bar").attr("aria-valuenow", data.progress).css("width", data.progress + "%").text(data.progress + "%");
+                                                    }
+                                                    if (data.complete) {
+                                                        clearInterval(progress_interval);
+                                                        window.location.href = "{% url 'model_set' %}";
+                                                    }
+                                                    }
+                                                });
+                                                {% endif %}
+                                            }, 1000);
+                                            }
+
+                                            var job_id = "{{ task_id }}";
+                                            show_progress(job_id);
+                                        });
+                                        </script>
+                                    {% endif %}
+
+
                                 </article>
                             </td>
                         </tr>
@@ -72,6 +152,5 @@
                 </td>
             </tr>
         </table>
-        {% comment %} <script src="{% static 'js/animation.js' %}"></script> {% endcomment %}
     </body>
 </html> 

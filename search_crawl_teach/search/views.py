@@ -1,3 +1,5 @@
+from celery.result import AsyncResult
+from celery_progress.views import get_progress
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404, HttpResponse, HttpResponseNotFound
@@ -16,7 +18,28 @@ menu = [
     {"title": "Добавить статью", "url_name": "add_page"},
     {"title": "Обратная связь", "url_name": "contact"},
     {"title": "Войти", "url_name": "login"},
+    {"models": list(ModelData.objects.all())},
 ]
+
+
+class ProgressRecorder:
+    def __init__(self, request, task_id):
+        self.current_task = AsyncResult(task_id)
+        self.request = request
+
+    def set_progress(self, progress_percentage):
+        self.current_task.task_meta["progress"] = progress_percentage
+        self.current_task.save()
+
+    def get_progress(self, request):  # updated method
+        task = self.current_task
+        if task.state == "PENDING":
+            return 0
+        elif task.state != "FAILURE":
+            progress = task.info.get("progress", 0)
+            return progress
+        else:
+            return 100
 
 
 class AddRequest(FormView):
@@ -25,10 +48,26 @@ class AddRequest(FormView):
     slug_url_kwarg = "model_slug"
     success_url = reverse_lazy("model_set")
 
-    def get_context_data(self, *, object_list=None, **kwargs):
+    def dispatch(self, request, *args, **kwargs):
+        self.request.session["task_id"] = None
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = "Добавление запроса"
+        context["models"] = list(ModelData.objects.all())
         context["menu"] = menu
+        task_id = self.request.session.get("task_id")
+        print(f"Celery Task ID: {task_id}")
+        if task_id:
+            task = AsyncResult(task_id)
+            print(f"The task state is: {task.state}")  # will be set to PROGRESS_STATE
+            print(f"The task info is: {task.info}")  # metadata will be here
+            context["task"] = task
+            progress_recorder = ProgressRecorder(self.request, task_id)
+            job_progress = progress_recorder.get_progress(self.request)
+            print("Progress is", job_progress)
+            context["job_progress"] = job_progress
         return context
 
     def form_valid(self, form):
@@ -37,12 +76,12 @@ class AddRequest(FormView):
         a = RequestData.objects.create(
             request_text=text, num_samples=n_images, slug=uuid.uuid4().hex, time_create=timezone.now()
         )
+        task = get_images_fit_request.delay(a.id, text, n_images)
+        self.request.session["task_id"] = task.id
+        print(f"Celery Task ID: {task.task_id}")
+        ret_val = self.render_to_response(self.get_context_data(task_id=task.id))
         a.save()
-        get_images_fit_request.run(a.id, text, n_images)
         return super().form_valid(form)
-
-    # def get_queryset(self):
-    #     return RequestData.objects.filter(is_published=True)
 
 
 class AddModel(CreateView):
@@ -55,6 +94,7 @@ class AddModel(CreateView):
         context = super().get_context_data(**kwargs)
         context["title"] = "Добавление модели"
         context["menu"] = menu
+        context["models"] = list(ModelData.objects.all())
         # print(self.kwargs["model_slug"])
         # a = ModelData.objects.last()
         # self.request_data = RequestData.objects.get(pk=self.kwargs["model_slug"])
@@ -74,6 +114,7 @@ class ModelInfo(DetailView):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = "menu"
+        context["models"] = list(ModelData.objects.all())
         context["menu"] = menu
         return context
 
@@ -87,6 +128,7 @@ class ImageListInfo(ListView):
         context = super().get_context_data(**kwargs)
         context["title"] = "menu"
         context["menu"] = menu
+        context["models"] = list(ModelData.objects.all())
         context["data"] = ImageData.objects.filter(request_data_id=self.kwargs["request_id"])
         return context
 

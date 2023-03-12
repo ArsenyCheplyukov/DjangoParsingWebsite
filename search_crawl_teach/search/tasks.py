@@ -5,6 +5,7 @@ import uuid
 from urllib.request import urlretrieve
 
 from celery import shared_task
+from celery_progress.backend import ProgressRecorder
 from django.conf import settings
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -12,8 +13,8 @@ from selenium.webdriver.common.by import By
 from .models import *
 
 
-@shared_task()
-def get_images_fit_request(object_id, request_text, n_images):
+@shared_task(bind=True)
+def get_images_fit_request(self, object_id, request_text, n_images):
     """PARSE IMAGES WITH GOOGLE WEBDRIVER"""
     url_prefixes = [
         "https://www.google.com/search?source=lnms&tbm=isch&sa=X&ved=2ahUKEwiE7InesOPxAhWF_SoKHXgvCikQ_AUoAXoECAIQAw&biw=929&bih=888&q=",
@@ -54,16 +55,19 @@ def get_images_fit_request(object_id, request_text, n_images):
 
     # CONFIGURE SELENIUM
     options = webdriver.ChromeOptions()
-    options.headless = True
+    options.headless = False
     driver = webdriver.Chrome(options=options)
     driver.maximize_window()
+
+    progress_recorder = ProgressRecorder(self)
 
     # MAKE SET FOR FINAL URLS, REMOVE DUPLICATES
     url_data = set()
 
-    for url_prefix, click_action, get_list_function, number_of_repeat in zip(
-        url_prefixes, click_actions, get_element_list_functions, numbers_of_repeat
+    for counted_i, unpack_staff in enumerate(
+        zip(url_prefixes, click_actions, get_element_list_functions, numbers_of_repeat)
     ):
+        url_prefix, click_action, get_list_function, number_of_repeat = unpack_staff
         search_url = url_prefix + request_text.strip().replace(" ", "+")
         driver.get(search_url)
 
@@ -71,7 +75,8 @@ def get_images_fit_request(object_id, request_text, n_images):
         # number_of_sites = len(url_prefixes)
         current_url_data = set()
         value = 0
-        for _ in range(number_of_repeat):
+
+        for counted_from_start in range(number_of_repeat):
             for _ in range(click_action[1]):
                 driver.execute_script("scrollBy(" + str(value) + ", " + str(value + 200) + ");")
                 value += 200
@@ -92,16 +97,21 @@ def get_images_fit_request(object_id, request_text, n_images):
                             current_url_data.add(src)
                 except Exception as StaleElementReferenceException:  # catches type error along with other errors
                     break
+        # print(f"\nFirst progress bar data are: {counted_i + 1} and {len(numbers_of_repeat)}\n")
+        progress_recorder.set_progress(counted_i + 1, len(get_element_list_functions), f"Some text")
+        # progress = (counted_from_start + 1) * 100 / number_of_repeat
+        # self.update_state(state="PROGRESS", meta={"percent": progress} if progress is not None else {})
         url_data.update(current_url_data)
     driver.close()
     pattern = "^https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)$"
     filtered = list(filter(lambda x: re.search(pattern, x), list(url_data)))
     count = 0
     print("Enter loop")
-    for i in filtered[:n_images]:
+    print("Number of images is:", len(filtered))
+    for current_count, i in enumerate(filtered[:n_images]):
         slug = uuid.uuid4().hex
         # urlretrieve(i, os.path.join(save_folder, request_text.strip().replace(" ", "_") + str(count) + ".jpg"))
-        print(settings.BASE_DIR)
+        # print(settings.BASE_DIR)
         try:
             result = urlretrieve(
                 i,
@@ -117,3 +127,6 @@ def get_images_fit_request(object_id, request_text, n_images):
             a.save()
         except:
             break
+        progress_recorder.set_progress(current_count + 1, n_images, f"Картинка номер: {current_count+1}")
+        # progress = (current_count + 1) * 100 / n_images
+        # self.update_state(state="PROGRESS", meta={"percent": progress} if progress is not None else {})

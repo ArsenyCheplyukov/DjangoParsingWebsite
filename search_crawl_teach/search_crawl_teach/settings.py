@@ -32,6 +32,10 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
+    "celery",
+    "django_celery_results",
+    "celery_progress",
+    # "channels",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -39,7 +43,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "search.apps.SearchConfig",
-    "django_celery_results",
 ]
 
 MIDDLEWARE = [
@@ -71,6 +74,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "search_crawl_teach.wsgi.application"
+ASGI_APPLICATION = "search_crawl_teach.asgi.application"
 
 
 # Database
@@ -140,6 +144,19 @@ CELERY_RESULT_BACKEND = "redis://" + REDIS_HOST + ":" + REDIS_PORT
 CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
+
+CELERY_TRACK_STARTED = True
+CELERYD_POOL_RESTARTS = True
+
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "asgi_redis.RedisChannelLayer",
+#         "CONFIG": {
+#             "hosts": [("localhost", 6379)],
+#         },
+#         "ROUTING": "example_channels.routing.channel_routing",
+#     }
+# }
 
 
 # redis://default:redispw@localhost:32768

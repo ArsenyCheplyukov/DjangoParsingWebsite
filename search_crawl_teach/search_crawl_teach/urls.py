@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
 from search.views import *
 
 from search_crawl_teach import settings
@@ -23,6 +23,7 @@ from search_crawl_teach import settings
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("search.urls")),
+    re_path(r"^celery-progress/", include("celery_progress.urls")),  # add this line (the endpoint is configurable)
 ]
 
 if settings.DEBUG:

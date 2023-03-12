@@ -43,7 +43,7 @@ class AddModelDataForm(forms.ModelForm):
         type = forms.ChoiceField(
             widget=forms.RadioSelect(
                 attrs={
-                    "class": "form-control",
+                    "id": "form-control",
                 }
             ),
             choices=TYPES,
