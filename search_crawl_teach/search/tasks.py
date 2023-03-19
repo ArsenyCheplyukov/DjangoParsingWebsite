@@ -7,8 +7,12 @@ from urllib.request import urlretrieve
 from celery import shared_task
 from celery_progress.backend import ProgressRecorder
 from django.conf import settings
+from django.dispatch import Signal
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+
+# Define a signal that will be fired to update the task status
+task_update = Signal()
 
 from .models import *
 
@@ -47,7 +51,7 @@ def get_images_fit_request(self, object_id, request_text, n_images):
 
     numbers_of_repeat = [n_images // 100, n_images // 100, n_images // 50, n_images // 10]
 
-    save_folder = "media/photos/"
+    save_folder = "media\\photos"
 
     # CHECK IS SAVE FOLDER ACTUALLY EXISTS
     if not os.path.exists(save_folder):
@@ -106,8 +110,8 @@ def get_images_fit_request(self, object_id, request_text, n_images):
     pattern = "^https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)$"
     filtered = list(filter(lambda x: re.search(pattern, x), list(url_data)))
     count = 0
-    print("Enter loop")
-    print("Number of images is:", len(filtered))
+    # print("Enter loop")
+    # print("Number of images is:", len(filtered))
     for current_count, i in enumerate(filtered[:n_images]):
         slug = uuid.uuid4().hex
         # urlretrieve(i, os.path.join(save_folder, request_text.strip().replace(" ", "_") + str(count) + ".jpg"))
@@ -116,7 +120,7 @@ def get_images_fit_request(self, object_id, request_text, n_images):
             result = urlretrieve(
                 i,
                 os.path.join(
-                    settings.BASE_DIR + "search_crawl_teach/media/photos",
+                    str(settings.BASE_DIR) + "\\" + save_folder,
                     slug + ".jpg",
                 ),
             )

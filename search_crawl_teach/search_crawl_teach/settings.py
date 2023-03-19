@@ -137,7 +137,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Celery settings
 REDIS_HOST = "default:redispw@localhost"
-REDIS_PORT = "32769"
+REDIS_PORT = "32768"
 CELERY_BROKER_URL = "redis://" + REDIS_HOST + ":" + REDIS_PORT
 CELERY_BROKER_TRANSPORT_OPTION = {"visibility_timeout": 3600}
 CELERY_RESULT_BACKEND = "redis://" + REDIS_HOST + ":" + REDIS_PORT

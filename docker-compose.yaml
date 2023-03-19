@@ -21,7 +21,7 @@ services:
   # The celery service, which runs asynchronous tasks using Celery and Redis as a broker and backend respectively 
   celery:
     build: .
-    command: celery -A search_crawl_teach worker -l info
+    command: celery -A search_crawl_teach worker -l info --pool=solo
     volumes:
       - .:/usr/src/app/
     environment:

@@ -1,3 +1,4 @@
+from celery.app.control import Control
 from celery.result import AsyncResult
 from celery_progress.views import get_progress
 from django.contrib.auth.decorators import login_required
@@ -76,11 +77,11 @@ class AddRequest(FormView):
         a = RequestData.objects.create(
             request_text=text, num_samples=n_images, slug=uuid.uuid4().hex, time_create=timezone.now()
         )
-        task = get_images_fit_request.delay(a.id, text, n_images)
-        self.request.session["task_id"] = task.id
-        print(f"Celery Task ID: {task.task_id}")
-        ret_val = self.render_to_response(self.get_context_data(task_id=task.id))
         a.save()
+        task = get_images_fit_request.delay(a.id, text, n_images)
+        self.request.session["task_id"] = task.task_id
+        print(f"Celery Task ID in form valid: {task.task_id}")
+        ret_val = self.render_to_response(self.get_context_data(task_id=task.task_id))
         return super().form_valid(form)
 
 
