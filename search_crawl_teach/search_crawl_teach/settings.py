@@ -17,6 +17,14 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+def is_running_in_docker():
+    with open("/proc/self/cgroup", "r") as f:
+        for line in f:
+            if "docker" in line:
+                return True
+    return False
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
@@ -35,7 +43,6 @@ INSTALLED_APPS = [
     "celery",
     "django_celery_results",
     "celery_progress",
-    # "channels",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -138,12 +145,15 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Celery settings
 REDIS_HOST = "default:redispw@localhost"
 REDIS_PORT = "32768"
-CELERY_BROKER_URL = "redis://" + REDIS_HOST + ":" + REDIS_PORT
+# CELERY_BROKER_URL = "redis://" + REDIS_HOST + ":" + REDIS_PORT
 CELERY_BROKER_TRANSPORT_OPTION = {"visibility_timeout": 3600}
-CELERY_RESULT_BACKEND = "redis://" + REDIS_HOST + ":" + REDIS_PORT
+# CELERY_RESULT_BACKEND = "redis://" + REDIS_HOST + ":" + REDIS_PORT
+CELERY_BROKER_URL = "redis://redis:6379/0" if is_running_in_docker() else "redis://" + REDIS_HOST + ":" + REDIS_PORT
+CELERY_RESULT_BACKEND = "redis://redis:6379/0" if is_running_in_docker() else "redis://" + REDIS_HOST + ":" + REDIS_PORT
 CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
+
 
 CELERY_TRACK_STARTED = True
 CELERYD_POOL_RESTARTS = True
@@ -160,3 +170,7 @@ CELERYD_POOL_RESTARTS = True
 
 
 # redis://default:redispw@localhost:32768
+
+
+PROGRESSBAR_DYNAMIC_UPDATE = True
+PROGRESSBAR_DESTROY_ON_EXIT = True

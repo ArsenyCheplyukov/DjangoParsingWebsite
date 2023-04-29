@@ -14,33 +14,17 @@ from .models import *
 from .tasks import *
 from .utils import *
 
+# from celery_progress.views import get_progress
+# from django_celery_progressbar.bars import ProgressBar
+# from django_celery_progressbar.models import TaskProgress
+
+
 menu = [
     {"title": "О сайте", "url_name": "about"},
     {"title": "Добавить статью", "url_name": "add_page"},
     {"title": "Обратная связь", "url_name": "contact"},
     {"title": "Войти", "url_name": "login"},
-    {"models": list(ModelData.objects.all())},
 ]
-
-
-class ProgressRecorder:
-    def __init__(self, request, task_id):
-        self.current_task = AsyncResult(task_id)
-        self.request = request
-
-    def set_progress(self, progress_percentage):
-        self.current_task.task_meta["progress"] = progress_percentage
-        self.current_task.save()
-
-    def get_progress(self, request):  # updated method
-        task = self.current_task
-        if task.state == "PENDING":
-            return 0
-        elif task.state != "FAILURE":
-            progress = task.info.get("progress", 0)
-            return progress
-        else:
-            return 100
 
 
 class AddRequest(FormView):
@@ -48,27 +32,15 @@ class AddRequest(FormView):
     template_name = "search/addrequest.html"
     slug_url_kwarg = "model_slug"
     success_url = reverse_lazy("model_set")
+    task_id = None
 
-    def dispatch(self, request, *args, **kwargs):
-        self.request.session["task_id"] = None
-        return super().dispatch(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, task_id=None, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = "Добавление запроса"
         context["models"] = list(ModelData.objects.all())
         context["menu"] = menu
-        task_id = self.request.session.get("task_id")
-        print(f"Celery Task ID: {task_id}")
         if task_id:
-            task = AsyncResult(task_id)
-            print(f"The task state is: {task.state}")  # will be set to PROGRESS_STATE
-            print(f"The task info is: {task.info}")  # metadata will be here
-            context["task"] = task
-            progress_recorder = ProgressRecorder(self.request, task_id)
-            job_progress = progress_recorder.get_progress(self.request)
-            print("Progress is", job_progress)
-            context["job_progress"] = job_progress
+            context["task_id"] = task_id
         return context
 
     def form_valid(self, form):
@@ -80,8 +52,8 @@ class AddRequest(FormView):
         a.save()
         task = get_images_fit_request.delay(a.id, text, n_images)
         self.request.session["task_id"] = task.task_id
-        print(f"Celery Task ID in form valid: {task.task_id}")
-        ret_val = self.render_to_response(self.get_context_data(task_id=task.task_id))
+        self.task_id = task.task_id
+        # print(f"Celery Task ID in form valid: {self.task_id}")
         return super().form_valid(form)
 
 
@@ -91,17 +63,20 @@ class AddModel(CreateView):
     slug_url_kwarg = "model_slug"
     allow_empty = False
 
-    def get_context_data(self, *, object_list=None, **kwargs):
+    def get(self, request, *args, **kwargs):
+        self.task_id = self.request.session.get("task_id")
+        print(f"The task id of model is {self.task_id}")
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, task_id=None, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = "Добавление модели"
         context["menu"] = menu
         context["models"] = list(ModelData.objects.all())
-        # print(self.kwargs["model_slug"])
-        # a = ModelData.objects.last()
-        # self.request_data = RequestData.objects.get(pk=self.kwargs["model_slug"])
-        # a.save()
-        # context["model_slug"] = self.kwargs["model_slug"]
-        # print(self.request.session.get('model_data'))
+        if task_id:
+            context["task_id"] = task_id
+        if self.task_id:
+            context["task_id"] = self.task_id
         return context
 
 
@@ -117,6 +92,7 @@ class ModelInfo(DetailView):
         context["title"] = "menu"
         context["models"] = list(ModelData.objects.all())
         context["menu"] = menu
+
         return context
 
 

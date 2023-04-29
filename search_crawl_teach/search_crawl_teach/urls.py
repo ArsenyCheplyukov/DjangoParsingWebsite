@@ -23,7 +23,7 @@ from search_crawl_teach import settings
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("search.urls")),
-    re_path(r"^celery-progress/", include("celery_progress.urls")),  # add this line (the endpoint is configurable)
+    path(r"^celery-progress/", include("celery_progress.urls")),
 ]
 
 if settings.DEBUG:

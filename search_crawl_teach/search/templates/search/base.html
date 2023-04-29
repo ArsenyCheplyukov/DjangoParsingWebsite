@@ -6,6 +6,7 @@
         <title>{{ title }}</title>
         {% load static %}
         <link rel="stylesheet" type="text/css" href="{% static 'search/css/styles.css' %}">
+        <script src="{% static 'search/js/animation.js' %}"></script>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
@@ -71,56 +72,30 @@
                                     {% endblock %}
 
                                     {% comment %} Make progress bar: {% endcomment %}
-
                                     {% if task_id %}
-                                        <div class="progress">
-                                        <div class="progress-bar progress-bar-striped" role="progressbar" aria-valuenow="{{ job_progress }}" aria-valuemin="0" aria-valuemax="100" style="width:{{ job_progress }}%">
-                                            {{ job_progress }}%
-                                        </div>
-                                        </div>
-
-                                        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                                        <script src="{% static 'celery_progress/celery_progress.js' %}"></script>
                                         <script>
-                                        $(document).ready(function() {
-                                            $("#my_form").submit(function(e) {
-                                            e.preventDefault();
-                                            var form_data = $(this).serialize();
-                                            $.ajax({
-                                                type: "POST",
-                                                url: "{% url 'home' %}",
-                                                data: form_data,
-                                                success: function(data) { }
+                                            document.addEventListener("DOMContentLoaded", function () {
+                                                var task_id = "{{ task_id }}";
+                                                if (task_id) {
+                                                    var progressUrl = "{% url 'celery_progress:task_status' task_id %}";
+                                                    CeleryProgressBar.initProgressBar(progressUrl);
+                                                    var intervalId = setInterval(function() {
+                                                        CeleryProgressBar.initProgressBar(progressUrl, function(progressBar) {
+                                                            var percentage = progressBar.getCompletionPercentage();
+                                                            if (percentage >= 100) {
+                                                                clearInterval(intervalId);
+                                                            }
+                                                        });
+                                                    }, 1000);
+                                                }
                                             });
-                                            });
-
-                                            var progress_interval = null;
-                                            function show_progress(job_id) {
-                                            progress_interval = setInterval(function() {
-                                                {% if job_id %}
-                                                $.ajax({
-                                                    type: "GET",
-                                                    url: "{% url 'celery_progress:task_status' job_id %}",
-                                                    success: function(data) {
-                                                    if (data.progress) {
-                                                        $(".progress-bar").attr("aria-valuenow", data.progress).css("width", data.progress + "%").text(data.progress + "%");
-                                                    }
-                                                    if (data.complete) {
-                                                        clearInterval(progress_interval);
-                                                        window.location.href = "{% url 'model_set' %}";
-                                                    }
-                                                    }
-                                                });
-                                                {% endif %}
-                                            }, 1000);
-                                            }
-
-                                            var job_id = "{{ task_id }}";
-                                            show_progress(job_id);
-                                        });
                                         </script>
+                                        <div class='progress-wrapper'>
+                                            <div id='progress-bar' class='progress-bar' style="background-color: #68a9ef; width: 0%;">&nbsp;</div>
+                                        </div>
+                                        <div id="progress-bar-message"></div>
                                     {% endif %}
-
-
                                 </article>
                             </td>
                         </tr>

@@ -1,0 +1,69 @@
+version: '3'
+
+services:
+  chrome:
+    image: selenium/standalone-chrome:latest
+    shm_size: 4gb
+    privileged: true
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - REDIS_PORT = "6379"
+
+  framework:
+    build: .
+    command: python ./search_crawl_teach/manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/usr/src/search_crawl_teach/
+    ports:
+      - 8000:8000
+      - 3000:3000
+    environment:
+      - DEBUG=1
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,[::1]
+      - CELERY_RESULT_BACKEND=redis://default:**@redis:6379
+    depends_on:
+      - redis
+      - chrome
+
+  celery:
+    build: .
+    command: celery -A search_crawl_teach worker -l info --pool=solo
+    working_dir: /usr/src/search_crawl_teach/search_crawl_teach/
+    volumes:
+      - .:/usr/src/search_crawl_teach/
+    ports:
+      - 6900:6900
+    environment:
+      - DEBUG=1
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,[::1]
+      - CELERY_BROKER_URL=redis://default:**@redis:6379
+      - REDIS_HOST=default:**@redis
+      - REDIS_PORT="6379"
+      - CELERY_RESULT_BACKEND=redis://default:**@redis:6379
+    depends_on:
+      - redis
+      - framework
+      - chrome
+
+  redis:
+    image: redis:alpine
+    command: [ "redis-server", "--bind", "redis", "--port", "6379" ]
+    volumes:
+      - data:/data
+    ports:
+      - 6379:6379
+
+  selenium-hub:
+    image: selenium/hub:latest
+    container_name: selenium-hub
+    ports:
+      - "4442:4442"
+      - "4443:4443"
+      - "4444:4444"
+
+volumes:
+  data:

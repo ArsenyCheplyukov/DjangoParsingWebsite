@@ -1,56 +1,73 @@
-# Use version 3 of the docker-compose file format
 version: '3'
 
-# Define services that make up the application
 services:
+  chrome:
+    image: selenium/standalone-chrome:112.0
+    container_name: google_browser
+    shm_size: 2gb
+    privileged: true
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - REDIS_PORT = "6379"
 
-  # The web service, which runs the Django application
-  web:
+  framework:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    container_name: django_website
+    command: python ./search_crawl_teach/manage.py runserver 0.0.0.0:8000
     volumes:
-      - .:/usr/src/app/
+      - .:/usr/src/search_crawl_teach/
     ports:
-      - 1337:8000
+      - 8000:8000
+      - 3000:3000
     environment:
       - DEBUG=1
-      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,[::1]
+      - CELERY_RESULT_BACKEND=redis://default:**@redis:6379
     depends_on:
-      - redis_hostname # NEW
+      - redis
+      - chrome
 
-  # The celery service, which runs asynchronous tasks using Celery and Redis as a broker and backend respectively 
   celery:
     build: .
+    container_name: celery
     command: celery -A search_crawl_teach worker -l info --pool=solo
+    working_dir: /usr/src/search_crawl_teach/search_crawl_teach/
     volumes:
-      - .:/usr/src/app/
+      - .:/usr/src/search_crawl_teach/
+    ports:
+      - 6900:6900
     environment:
       - DEBUG=1
-      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,[::1]
+      - CELERY_BROKER_URL=redis://default:**@redis:6379
+      - REDIS_HOST=default:**@redis
+      - REDIS_PORT="6379"
+      - CELERY_RESULT_BACKEND=redis://default:**@redis:6379
     depends_on:
-      - redis_hostname
-      - web
+      - redis
+      - framework
+      - chrome
 
-  # # The flower service, which provides an interface for monitoring Celery tasks  
-  # flower:
-  #   image: mher/flower # Use Flower Docker image from Docker Hub  
-  #   command: --port=5555 --broker=redis://redis_hostname/0 # Run Flower on port 5555 with Redis as broker  
-
-  redis_hostname:
-    image: redis:latest
+  redis:
+    image: redis:alpine
+    container_name: redis
+    command: [ "redis-server", "--bind", "redis", "--port", "6379" ]
     volumes:
       - data:/data
     ports:
       - 6379:6379
 
-  db_hostname:
-    # Postgres database used by Django app 
-    image: nouchka/sqlite3:latest
-    stdin_open: true
-    tty: true
+  selenium-hub:
+    image: selenium/hub:4.9.0
+    container_name: selenium-hub
     ports:
-      - 9000:9000 # expose ports - HOST:CONTAINER
-    restart: unless-stopped
+      - "4442:4442"
+      - "4443:4443"
+      - "4444:4444"
 
 volumes:
   data:

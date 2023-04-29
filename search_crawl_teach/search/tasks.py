@@ -8,6 +8,8 @@ from celery import shared_task
 from celery_progress.backend import ProgressRecorder
 from django.conf import settings
 from django.dispatch import Signal
+
+# from django_celery_progressbar.bars import ProgressBar
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
@@ -20,6 +22,7 @@ from .models import *
 @shared_task(bind=True)
 def get_images_fit_request(self, object_id, request_text, n_images):
     """PARSE IMAGES WITH GOOGLE WEBDRIVER"""
+    total_work_to_do = 100
     url_prefixes = [
         "https://www.google.com/search?source=lnms&tbm=isch&sa=X&ved=2ahUKEwiE7InesOPxAhWF_SoKHXgvCikQ_AUoAXoECAIQAw&biw=929&bih=888&q=",
         "https://yandex.ru/images/search?text=",
@@ -51,7 +54,7 @@ def get_images_fit_request(self, object_id, request_text, n_images):
 
     numbers_of_repeat = [n_images // 100, n_images // 100, n_images // 50, n_images // 10]
 
-    save_folder = "media\\photos"
+    save_folder = "media/photos"
 
     # CHECK IS SAVE FOLDER ACTUALLY EXISTS
     if not os.path.exists(save_folder):
@@ -59,8 +62,16 @@ def get_images_fit_request(self, object_id, request_text, n_images):
 
     # CONFIGURE SELENIUM
     options = webdriver.ChromeOptions()
-    options.headless = False
-    driver = webdriver.Chrome(options=options)
+    options.headless = True  # False
+    # driver = webdriver.Chrome(options=options)
+
+    if os.path.exists("/proc/self/cgroup"):
+        # Running inside a Docker container
+        driver = webdriver.Remote(command_executor="http://chrome:4444/wd/hub", options=options)
+    else:
+        # Running outside a Docker container
+        driver = webdriver.Chrome(options=options)
+
     driver.maximize_window()
 
     progress_recorder = ProgressRecorder(self)
@@ -75,8 +86,6 @@ def get_images_fit_request(self, object_id, request_text, n_images):
         search_url = url_prefix + request_text.strip().replace(" ", "+")
         driver.get(search_url)
 
-        # count = 0
-        # number_of_sites = len(url_prefixes)
         current_url_data = set()
         value = 0
 
@@ -101,36 +110,40 @@ def get_images_fit_request(self, object_id, request_text, n_images):
                             current_url_data.add(src)
                 except Exception as StaleElementReferenceException:  # catches type error along with other errors
                     break
-        # print(f"\nFirst progress bar data are: {counted_i + 1} and {len(numbers_of_repeat)}\n")
-        progress_recorder.set_progress(counted_i + 1, len(get_element_list_functions), f"Some text")
-        # progress = (counted_from_start + 1) * 100 / number_of_repeat
-        # self.update_state(state="PROGRESS", meta={"percent": progress} if progress is not None else {})
+
+        progress_recorder.set_progress(((counted_i + 1) * 50) // len(numbers_of_repeat), total_work_to_do)
         url_data.update(current_url_data)
     driver.close()
     pattern = "^https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)$"
     filtered = list(filter(lambda x: re.search(pattern, x), list(url_data)))
+    # print(filtered, "\n", os.path.join(str(settings.BASE_DIR), save_folder))
     count = 0
-    # print("Enter loop")
-    # print("Number of images is:", len(filtered))
     for current_count, i in enumerate(filtered[:n_images]):
         slug = uuid.uuid4().hex
-        # urlretrieve(i, os.path.join(save_folder, request_text.strip().replace(" ", "_") + str(count) + ".jpg"))
-        # print(settings.BASE_DIR)
         try:
             result = urlretrieve(
                 i,
                 os.path.join(
-                    str(settings.BASE_DIR) + "\\" + save_folder,
+                    os.path.join(str(settings.BASE_DIR), save_folder),
                     slug + ".jpg",
                 ),
             )
             count += 1
             name = request_text.strip().replace(" ", "_") + str(count)
+            # print(f"The object id is: {object_id}")
             ref_object = RequestData.objects.get(id=object_id)
-            a = ImageData.objects.create(photo=f"photos/{slug}.jpg", name=name, slug=slug, request_data=ref_object)
+            # print(f"Query to find data status: {1 if ref_object else 0}")
+            a = ImageData.objects.create(
+                photo=os.path.join(save_folder, f"{slug}.jpg"), name=name, slug=slug, request_data=ref_object
+            )
+            # print(f'The pass of downloaded image is: {os.path.join(save_folder, f"{slug}.jpg")}')
             a.save()
-        except:
+        except Exception as e:
+            # print(str(e))
             break
-        progress_recorder.set_progress(current_count + 1, n_images, f"Картинка номер: {current_count+1}")
-        # progress = (current_count + 1) * 100 / n_images
-        # self.update_state(state="PROGRESS", meta={"percent": progress} if progress is not None else {})
+
+        asd = len(filtered)
+
+        # print(str(asd) + " " + str(current_count))
+
+        progress_recorder.set_progress(((counted_i + 1) * 50) // len(numbers_of_repeat) + 50, total_work_to_do)

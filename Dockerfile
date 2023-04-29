@@ -1,15 +1,15 @@
-FROM python:3
+FROM python:3.11-alpine
 
 ENV PYTHONBUFFERED 1
 
-ADD . /app
+ADD . /search_crawl_tech
 
-WORKDIR /app/search_crawl_teach
+WORKDIR /usr/src/search_crawl_teach
 
-COPY ./requirements.txt /app/search_crawl_teach/requirements.txt
+COPY requirements.txt ./
 
 RUN pip install --upgrade pip
 
 RUN pip install -r requirements.txt
 
-COPY . /app
+COPY . .

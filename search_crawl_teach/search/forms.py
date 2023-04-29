@@ -10,7 +10,7 @@ from .models import *
 class AddRequestDataForm(forms.Form):
     request_text = forms.CharField(label="Текст запроса", max_length=255)  # verbose_name="Текст запроса"
     num_samples = forms.IntegerField(
-        label="Колличество картинок", validators=[MinValueValidator(10), MaxValueValidator(500)]
+        label="Количество картинок", validators=[MinValueValidator(10), MaxValueValidator(500)]
     )
 
     # def __init__(self, *args, **kwargs):
