@@ -18,10 +18,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 def is_running_in_docker():
-    with open("/proc/self/cgroup", "r") as f:
-        for line in f:
-            if "docker" in line:
-                return True
+    try:
+        with open("/proc/self/cgroup", "r") as f:
+            for line in f:
+                if "docker" in line:
+                    return True
+    except:
+        pass
     return False
 
 
@@ -142,14 +145,17 @@ MEDIA_URL = "/media/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
+USE_DOCKER = is_running_in_docker()
+
+
 # Celery settings
 REDIS_HOST = "default:redispw@localhost"
 REDIS_PORT = "32768"
 # CELERY_BROKER_URL = "redis://" + REDIS_HOST + ":" + REDIS_PORT
 CELERY_BROKER_TRANSPORT_OPTION = {"visibility_timeout": 3600}
 # CELERY_RESULT_BACKEND = "redis://" + REDIS_HOST + ":" + REDIS_PORT
-CELERY_BROKER_URL = "redis://redis:6379/0" if is_running_in_docker() else "redis://" + REDIS_HOST + ":" + REDIS_PORT
-CELERY_RESULT_BACKEND = "redis://redis:6379/0" if is_running_in_docker() else "redis://" + REDIS_HOST + ":" + REDIS_PORT
+CELERY_BROKER_URL = "redis://redis:6379/0" if USE_DOCKER else "redis://" + REDIS_HOST + ":" + REDIS_PORT
+CELERY_RESULT_BACKEND = "redis://redis:6379/0" if USE_DOCKER else "redis://" + REDIS_HOST + ":" + REDIS_PORT
 CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"

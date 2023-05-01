@@ -1,9 +1,10 @@
 version: '3'
-
+# docker-compose -f docker-compose.yml up --build
 services:
   chrome:
     image: selenium/standalone-chrome:112.0
     container_name: google_browser
+    command: [ "/opt/bin/entry_point.sh", "--no-sandbox" ]
     shm_size: 2gb
     privileged: true
     depends_on:

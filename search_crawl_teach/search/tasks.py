@@ -64,14 +64,13 @@ def get_images_fit_request(self, object_id, request_text, n_images):
     options = webdriver.ChromeOptions()
     options.headless = True  # False
     # driver = webdriver.Chrome(options=options)
-
-    if os.path.exists("/proc/self/cgroup"):
+    print("Went into driver")
+    if os.path.exists("/proc/self/cgroup") and "docker" in open("/proc/self/cgroup").read():
         # Running inside a Docker container
         driver = webdriver.Remote(command_executor="http://chrome:4444/wd/hub", options=options)
     else:
         # Running outside a Docker container
         driver = webdriver.Chrome(options=options)
-
     driver.maximize_window()
 
     progress_recorder = ProgressRecorder(self)

@@ -85,16 +85,28 @@
                                                             var percentage = progressBar.getCompletionPercentage();
                                                             if (percentage >= 100) {
                                                                 clearInterval(intervalId);
+                                                            } else {
+                                                                var progressBarEl = document.getElementById('progress-bar');
+                                                                progressBarEl.style.width = percentage;
+                                                                progressBarEl.setAttribute('data-percentage', percentage);
+                                                                var progressBarMessageEl = document.getElementById('progress-bar-message');
+                                                                progressBarMessageEl.innerHTML = percentage + 'Complete';
                                                             }
                                                         });
                                                     }, 1000);
                                                 }
                                             });
                                         </script>
-                                        <div class='progress-wrapper'>
-                                            <div id='progress-bar' class='progress-bar' style="background-color: #68a9ef; width: 0%;">&nbsp;</div>
+                                        <div class="progress-wrapper">
+                                            <div class="progress-text">
+                                                <span id="progress-bar-message"></span>
+                                            </div>
+                                            <div class="progress-bar-wrapper">
+                                                <div id="progress-bar" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" data-percentage="0">
+                                                    <span class="sr-only">0% Complete</span>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div id="progress-bar-message"></div>
                                     {% endif %}
                                 </article>
                             </td>
