@@ -1,74 +1,141 @@
-version: '3'
-# docker-compose -f docker-compose.yml up --build
-services:
-  chrome:
-    image: selenium/standalone-chrome:112.0
-    container_name: google_browser
-    command: [ "/opt/bin/entry_point.sh", "--no-sandbox" ]
-    shm_size: 2gb
-    privileged: true
-    depends_on:
-      - selenium-hub
-    environment:
-      - SE_EVENT_BUS_HOST=selenium-hub
-      - SE_EVENT_BUS_PUBLISH_PORT=4442
-      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
-      - REDIS_PORT = "6379"
+  version: '3'
+  services:
+    chrome:
+      # because i update google chrome regulary
+      image: selenium/standalone-chrome:latest
+      container_name: google_browser
+      command: [ "/opt/bin/entry_point.sh", "--no-sandbox" ]
+      shm_size: 4gb
+      privileged: true
+      depends_on:
+        - selenium-hub
+      environment:
+        - SE_EVENT_BUS_HOST=selenium-hub
+        - SE_EVENT_BUS_PUBLISH_PORT=4442
+        - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+        - REDIS_PORT=6379
 
-  framework:
-    build: .
-    container_name: django_website
-    command: python ./search_crawl_teach/manage.py runserver 0.0.0.0:8000
-    volumes:
-      - .:/usr/src/search_crawl_teach/
-    ports:
-      - 8000:8000
-      - 3000:3000
-    environment:
-      - DEBUG=1
-      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,[::1]
-      - CELERY_RESULT_BACKEND=redis://default:**@redis:6379
-    depends_on:
-      - redis
-      - chrome
+    db:
+    #15.4-bookworm
+      image: postgres:15.4-alpine3.18
+      restart: always
+      volumes:
+        - ./search_crawl_teach:/usr/src/search_crawl_teach/
+      container_name: postgres
+      environment:
+        POSTGRES_PASSWORD: root
+        POSTGRES_USER: postgres
+        POSTGRES_DB: db
+        PGDATA: /usr/src/search_crawl_teach/postgres/data/
+        PORT: "5432"
+      ports:
+        - "5432:5432"
 
-  celery:
-    build: .
-    container_name: celery
-    command: celery -A search_crawl_teach worker -l info --pool=solo
-    working_dir: /usr/src/search_crawl_teach/search_crawl_teach/
-    volumes:
-      - .:/usr/src/search_crawl_teach/
-    ports:
-      - 6900:6900
-    environment:
-      - DEBUG=1
-      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,[::1]
-      - CELERY_BROKER_URL=redis://default:**@redis:6379
-      - REDIS_HOST=default:**@redis
-      - REDIS_PORT="6379"
-      - CELERY_RESULT_BACKEND=redis://default:**@redis:6379
-    depends_on:
-      - redis
-      - framework
-      - chrome
+    adminer:
+      image: adminer
+      restart: always
+      ports:
+        - "8080:8080"
 
-  redis:
-    image: redis:alpine
-    container_name: redis
-    command: [ "redis-server", "--bind", "redis", "--port", "6379" ]
-    volumes:
-      - data:/data
-    ports:
-      - 6379:6379
+    framework:
+      build:
+        context: .
+        dockerfile: Dockerfile
+      container_name: django_website
+      command:
+        - sh
+        - -c
+        - |
+          python3 manage.py migrate
+          python3 manage.py createcachetable
+          python3 manage.py collectstatic  --noinput
+          gunicorn search_crawl_teach.wsgi:application -c gunicorn_config.py --bind 0.0.0.0:8000 --reload
+      volumes:
+        - ./search_crawl_teach:/usr/src/search_crawl_teach/
+        - static_volume:/usr/src/search_crawl_teach/static/  # <-- bind the static files
+        - media_volume:/usr/src/search_crawl_teach/media/  # <-- bind the media files
+      ports:
+        - "8000:8000"
+        - "3000:3000"
+        #- "5432:5432"
+      environment:
+        - DEBUG=1
+        - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,[::1]
+        - CELERY_RESULT_BACKEND=redis://default:**@redis:6379
+      depends_on:
+        - redis
+        - chrome
+        - db
 
-  selenium-hub:
-    image: selenium/hub:4.9.0
-    container_name: selenium-hub
-    ports:
-      - "4442:4442"
-      - "4443:4443"
-      - "4444:4444"
+    nginx:
+      build:
+        context: ./nginx
+        dockerfile: Dockerfile
+      container_name: nginx
+      restart: always
+      volumes:
+        - nginx_data:/etc/nginx/
+        - static_volume:/usr/src/search_crawl_teach/static/
+        - media_volume:/usr/src/search_crawl_teach/media/
+        - nginx_logs:/var/log/nginx
+      ports:
+        - "80:80"
+      #depends_on:
+      #  - framework
 
-volumes:
-  data:
+    celery:
+      build: .
+      command: celery -A search_crawl_teach worker -l info --pool=solo
+      working_dir: /usr/src/search_crawl_teach/search_crawl_teach/
+      volumes:
+        - .:/usr/src/search_crawl_teach/
+      ports:
+        - 6900:6900
+      environment:
+        - DEBUG=1
+        - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,[::1]
+        - CELERY_BROKER_URL=redis://default:**@redis:6379
+        - REDIS_HOST=default:**@redis
+        - REDIS_PORT="6379"
+        - CELERY_RESULT_BACKEND=redis://default:**@redis:6379
+      depends_on:
+        - redis
+        - framework
+        - chrome
+    
+    flower:
+      image: mher/flower:0.9.7
+      container_name: celery-flower
+      ports:
+        - "5555:5555"
+      environment:
+        - CELERY_BROKER=redis://default:**@redis:6379
+      depends_on:
+        - celery
+
+    redis:
+      image: redis:alpine
+      command: [ "redis-server", "--bind", "redis", "--port", "6379" ]
+      volumes:
+        - data:/data
+      ports:
+        - 6379:6379
+
+    selenium-hub:
+      image: selenium/hub:latest
+      container_name: selenium-hub
+      ports:
+        - "4442:4442"
+        - "4443:4443"
+        - "4444:4444"
+
+  networks:
+    app-network:
+      driver: bridge
+
+  volumes:
+    data:
+    nginx_data:
+    nginx_logs:
+    static_volume:  # <-- declare the static volume
+    media_volume:  # <-- declare the media volume

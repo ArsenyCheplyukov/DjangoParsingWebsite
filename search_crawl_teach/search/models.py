@@ -20,7 +20,7 @@ class RequestData(models.Model):
     )
     slug = models.SlugField(max_length=255, verbose_name="URL")
     time_create = models.DateTimeField(auto_now_add=True, verbose_name="Время создания")
-    is_published = models.BooleanField(default=True, verbose_name="Публикация")
+    is_published = models.BooleanField(default=True, verbose_name="Публикация") # for recreation of db
 
     def __str__(self):
         return self.request_text[:25]

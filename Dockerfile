@@ -1,15 +1,20 @@
 FROM python:3.11-alpine
 
-ENV PYTHONBUFFERED 1
+# prevent from bytecode files (pyc)
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
-ADD . /search_crawl_tech
-
-WORKDIR /usr/src/search_crawl_teach
-
-COPY requirements.txt ./
-
+# lint
 RUN pip install --upgrade pip
+RUN pip install flake8==6.0.0
+# RUN flake8 --ignore=E501,F401 # don't run with it
 
-RUN pip install -r requirements.txt
+WORKDIR /usr/src/search_crawl_teach/
 
-COPY . .
+# data
+COPY . /usr/src/
+
+# requisits installation
+COPY requirements.txt ./
+RUN pip install -r requirements.txt                   # --no-deps
+# RUN pip wheel --no-cache-dir --wheel-dir /usr/src/wheels -r /usr/src/requirements.txt

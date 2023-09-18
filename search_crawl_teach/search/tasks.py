@@ -54,7 +54,7 @@ def get_images_fit_request(self, object_id, request_text, n_images):
 
     numbers_of_repeat = [n_images // 100, n_images // 100, n_images // 50, n_images // 10]
 
-    save_folder = "media/photos"
+    save_folder = os.path.join(settings.MEDIA_ROOT, "photos")
 
     # CHECK IS SAVE FOLDER ACTUALLY EXISTS
     if not os.path.exists(save_folder):
@@ -123,7 +123,7 @@ def get_images_fit_request(self, object_id, request_text, n_images):
             result = urlretrieve(
                 i,
                 os.path.join(
-                    os.path.join(str(settings.BASE_DIR), save_folder),
+                    save_folder,
                     slug + ".jpg",
                 ),
             )
@@ -135,7 +135,7 @@ def get_images_fit_request(self, object_id, request_text, n_images):
             a = ImageData.objects.create(
                 photo=os.path.join(save_folder, f"{slug}.jpg"), name=name, slug=slug, request_data=ref_object
             )
-            # print(f'The pass of downloaded image is: {os.path.join(save_folder, f"{slug}.jpg")}')
+            print(f'The path of downloaded image is: {os.path.join(save_folder, f"{slug}.jpg")}')
             a.save()
         except Exception as e:
             # print(str(e))

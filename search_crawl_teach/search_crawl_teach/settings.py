@@ -37,7 +37,7 @@ SECRET_KEY = "django-insecure-ol0=1spd!5_^g5q$p+%4&%4okb@ft_16jpgmco@hth^&!tn=c%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
 
 # Application definition
@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "search.apps.SearchConfig",
+    "search_crawl_teach",
 ]
 
 MIDDLEWARE = [
@@ -90,10 +91,21 @@ ASGI_APPLICATION = "search_crawl_teach.asgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
+
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "db",
+        "USER": "postgres",
+        "PASSWORD": "root",
+        "HOST": "db",
+        "PORT": 5432,
     }
 }
 
